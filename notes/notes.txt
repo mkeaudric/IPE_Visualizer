@@ -1,0 +1,34 @@
+Dokumentasi : https://otfried.github.io/ipe/90_file_format.html
+
+Circle / Ellipse 
+(42.5301 0 0 42.5301 448.603 586.746 e) -> e adalah operator path construction untuk ellipse
+ |_____| |_| |_____| |_____________|
+    |     |       |          |
+    ry   Shear?  rx    Koordinat titik tengah
+
+Circumcenter, pake rumus kartesian
+Rumus di wikipedia 
+2 titik -> titik tengah garis
+3 titik non-kolinear -> https://en.wikipedia.org/wiki/Circumcircle#Cartesian_coordinates_2
+kalau 3 titik kolinear, ambil 2 titik paling berjauhan, pake yang 2 titik
+
+Replace line di template.txt
+https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file/20040289#20040289
+
+Ngatur layout https://tex.stackexchange.com/questions/599418/how-to-increase-the-size-of-the-canvas-of-ipe-extensible-drawing-editor-which-is
+<ipestyle name="customsize">
+   <layout paper="1612 400" origin="0 0" frame="1612 400"/>
+</ipestyle>
+
+
+Insert data IPE
+<page>
+<layer name="step_1"/>
+... -> tambah layer
+<view layers="step_1" active="step_1"/> -> active layer
+<path layer="step_1" stroke="black">
+... -> isi layer
+</path>
+... -> layer berikutnya
+</page>
+</ipe>
