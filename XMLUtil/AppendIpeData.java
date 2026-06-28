@@ -31,10 +31,21 @@ public class AppendIpeData {
     public String pointSetToIpe(PointSet P, String color, String layerName) {
         StringBuilder res = new StringBuilder();
         int len = P.getSize();
+        
         for (int i = 0; i < len; i++) {
+            // Ambil koordinat aslinya
+            double px = P.getPoint(i).x;
+            double py = P.getPoint(i).y;
+            
+            // 1. Gambar titik (disk) di posisi aslinya
             res.append(String.format(
                 "<use layer=\"%s\" name=\"mark/disk(sx)\" pos=\"%.2f %.2f\" size=\"normal\" stroke=\"%s\"/>\n",
-                layerName, P.getPoint(i).x, P.getPoint(i).y, color
+                layerName, px, py, color
+            ));
+
+            res.append(String.format(
+                "<text layer=\"%s\" transformations=\"translations\" pos=\"%.2f %.2f\" stroke=\"%s\" type=\"label\" valign=\"baseline\" style=\"math\">x_{%d}</text>\n",
+                layerName, px + 5.0, py + 5.0, color, i
             ));
         }
         return res.toString();
