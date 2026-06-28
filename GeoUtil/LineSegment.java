@@ -1,3 +1,4 @@
+package GeoUtil;
 public class LineSegment {
     Point start;
     Point end;

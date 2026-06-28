@@ -13,42 +13,35 @@ import GeoUtil.PointSet;
 import XMLUtil.InsertLine;
 
 @SuppressWarnings("unused")
-public class VisualizerIPE{
-    private static final Path T1 = Paths.get("template1.txt");
-    private static final Path T2 = Paths.get("template2.txt");
+public class VisualizerIPE {
+    private static final Path template = Paths.get("template1.txt");
 
     // ngitung manual, posisi nulis
     // TODO : nantinya diganti XMLUtil buat nyari line kemunculan line pertama yang mau diedit
-    // lalu dihitung offset?
-    private static int styleSheetT1 = 6;
-    private static int layerEditT1 = styleSheetT1 + 308; // awal di 314
-    private static int dataEditT1 = layerEditT1 + 1; // awal di 316
+    private static int styleSheet = 6;
+    private static int layerEdit = styleSheet + 308; // awal di 314
+    private static int dataEdit = layerEdit + 1; // awal di 316
     
-    // private static int styleSheetT2 = 0;
-    // private static int layerEditT2 = 9767; // buat nambah layer disini
-    // private static int dataEditT2 = 9780;
-    
-    public static void initiateDrawing(Scanner sc, int c1, int c2, String filename) throws IOException {
+    public static void initiateDrawing(Scanner sc, int c2, String filename) throws IOException {
         File output = new File(filename);
         if(output.createNewFile()){
-            System.out.println("file " + filename + " dibuat");
-        } else{
+            System.out.println("File " + filename + " berhasil dibuat.");
+        } else {
             int c3;
-            System.out.print("File sudah ada.\nTimpa isi file?\n");
             while(true){
-                try{
-                    System.out.print("File sudah ada.\nTimpa isi file?\n1. ya 1\n2. tidak\n");
+                try {
+                    System.out.print("File sudah ada.\nTimpa isi file?\n1. Ya\n2. Tidak\nPilihan: ");
                     c3 = sc.nextInt();
                     if(c3 == 1) {
                         break;
                     }
                     else if(c3 == 2) {
-                        return;
+                        return; // Batal eksekusi
                     } else {
-                        System.out.println("pilih 1 / 2");
+                        System.out.println("Pilih 1 atau 2.");
                     }
                 } catch (InputMismatchException e){
-                    System.out.println("Input harus int");
+                    System.out.println("Input harus berupa angka bulat (integer).");
                     sc.nextLine();
                     continue;
                 }
@@ -57,54 +50,37 @@ public class VisualizerIPE{
 
         Path outputFile = Paths.get(filename);
 
-        if(c1 == 1){ // template 1
-            Files.copy(T1, outputFile, StandardCopyOption.REPLACE_EXISTING);
-            System.out.print("Masukan n, jumlah titik: ");
-            int n = sc.nextInt();
-            PointSet P = new PointSet();
+        // Langsung copy template 1
+        Files.copy(template, outputFile, StandardCopyOption.REPLACE_EXISTING);
+        
+        System.out.print("Masukan n, jumlah titik: ");
+        int n = sc.nextInt();
+        PointSet P = new PointSet();
 
-            int i;
-            for(i = 0; i < n; i++){
-                double x = sc.nextDouble();
-                double y = sc.nextDouble();
-                Point p = new Point(x, y);
-                P.addPoint(p);
-            }
+        for(int i = 0; i < n; i++){
+            double x = sc.nextDouble();
+            double y = sc.nextDouble();
+            Point p = new Point(x, y);
+            P.addPoint(p);
+        }
 
-            String canvas = calculateLayout(P.getMin_x(), P.getMax_x(), P.getMin_y(), P.getMax_y(), 30);
+        // Hitung canvas satu kali saja di sini, berlaku untuk algoritma apapun
+        String canvas = calculateLayout(P.getMin_x(), P.getMax_x(), P.getMin_y(), P.getMax_y(), 30);
 
-            if(c2 == 1){ // DnC CH
-                double min_x = P.getMin_x();
-                double max_x = P.getMax_x();
-                double min_y = P.getMin_y();
-                double max_y = P.getMax_y();
-                // implementasi DnC CH
-                System.out.println("Fitur belum dibuat...");
-            } else{ // SEC
-                double min_x = P.getMin_x();
-                double max_x = P.getMax_x();
-                double min_y = P.getMin_y();
-                double max_y = P.getMax_y();
+        if(c2 == 1){ // DnC CH
+            // TODO: implementasi DnC CH
+            System.out.println("Fitur Divide and Conquer Convex Hull belum dibuat...");
+        } else { // SEC
+            SEC solver = new SEC();
+            Circle res = solver.miniDisc(P);
+            InsertLine ins = new InsertLine();
 
-                SEC solver = new SEC();
-
-                Circle res = solver.miniDisc(P);
-
-                InsertLine ins = new InsertLine();
-
-                // masukin dari paling bawah dulu
-                ins.insertTextAtLine(outputFile, dataEditT1, solver.getData()); // lompat 1, ada baris buat active layer
-                ins.insertTextAtLine(outputFile, layerEditT1, solver.getNewLayer());
-                ins.insertTextAtLine(outputFile, styleSheetT1, canvas);
-            }
-        } else{ // template 2
-            Files.copy(T2, outputFile, StandardCopyOption.REPLACE_EXISTING);
-
-            if(c2 == 1){ // DnC CH
-                System.out.println("Fitur belum dibuat...");
-            } else{ // SEC
-                System.out.println("Fitur belum dibuat...");
-            }
+            // Masukin dari paling bawah dulu (Reverse Insertion) biar offset ga berantakan
+            ins.insertTextAtLine(outputFile, dataEdit, solver.getData()); 
+            ins.insertTextAtLine(outputFile, layerEdit, solver.getNewLayer());
+            ins.insertTextAtLine(outputFile, styleSheet, canvas);
+            
+            System.out.println("Visualisasi SEC selesai dan disimpan ke " + filename);
         }
     }
 
@@ -132,41 +108,19 @@ public class VisualizerIPE{
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         String filename;
-        int c1, c2;
-
-        while(true){
-            try{
-                System.out.print("Pilih template:\n1. template 1\n2. template 2 (+ background PPT)\n");
-                c1 = sc.nextInt();
-                if(c1 == 1) {
-                    break;
-                }
-                else if(c1 == 2) {
-                    break;
-                } else {
-                    System.out.println("pilih 1 / 2");
-                }
-            } catch (InputMismatchException e){
-                System.out.println("Input harus int");
-                sc.nextLine(); // buang isi c1
-                continue;
-            }
-        }
+        int c2;
         
         while(true){
             try{
-                System.out.print("Pilih visualisasi:\n1. DnC CH\n2. SEC\n");
+                System.out.print("Pilih visualisasi:\n1. DnC CH\n2. SEC\nPilihan: ");
                 c2 = sc.nextInt();
-                if(c2 == 1) {
-                    break;
-                }
-                else if(c2 == 2) {
+                if(c2 == 1 || c2 == 2) {
                     break;
                 } else {
-                    System.out.println("pilih 1 / 2");
+                    System.out.println("Pilih 1 atau 2.");
                 }
             } catch (InputMismatchException e){
-                System.out.println("Input harus int");
+                System.out.println("Input harus berupa angka bulat (integer).");
                 sc.nextLine();
                 continue;
             }
@@ -174,15 +128,15 @@ public class VisualizerIPE{
 
         System.out.print("Nama file: ");
         filename = sc.next();
-        while(!filename.endsWith(".ipe") || !(filename.length() > 4)){
+        while(!filename.endsWith(".ipe") || filename.length() <= 4){
             System.out.print("Ekstensi file harus .ipe\nNama file: ");
             filename = sc.next();
         }
 
         try {
-            initiateDrawing(sc, c1, c2, filename);
+            initiateDrawing(sc, c2, filename);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Gagal menulis file: " + e.getMessage());
         }
     }
 }

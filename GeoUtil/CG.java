@@ -1,3 +1,4 @@
+package GeoUtil;
 // kelas utilitas
 public class CG {
     public static final double EPS = 0.00000001;

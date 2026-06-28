@@ -1,5 +1,4 @@
 package Algo;
-
 import GeoUtil.Circle;
 import GeoUtil.Point;
 import GeoUtil.PointSet;
