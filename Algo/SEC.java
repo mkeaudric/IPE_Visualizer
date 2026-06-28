@@ -22,7 +22,7 @@ public class SEC {
         if(len == 0) return null;
         if(len == 1) {
             Circle C = new Circle(P.getPoint(0), P.getPoint(0));
-            data.append(appender.recordStep(C, "step_" + step, "red"));
+            data.append(appender.recordStep(C, "step_" + step++, "red", "Selesai: Hanya ada 1 titik."));
             return C;
         }
 
@@ -30,26 +30,34 @@ public class SEC {
         Point p1 = P.getPoint(1);
         Circle C = new Circle(p, p1);
 
-        data.append(appender.recordStep(C, "step_" + step++, "blue"));
+        data.append(appender.recordStep(C, "step_" + step++, "blue", 
+            "Inisialisasi basis awal dari titik $x_0$ dan $x_1$."
+        ));
 
         Point pi;
         for(i = 2; i < len; i++){
             pi = P.getPoint(i);
+            String desc;
+            
             if(!C.contains(pi)){
-                C = miniDiscWith1Point(P, i, pi);
+                // Tambahkan argumen indeks 'i' ke parameter fungsi
+                C = miniDiscWith1Point(P, i, pi, i);
+                desc = String.format("Evaluasi $x_{%d}$: Titik berada di \\textbf{luar}. Lingkaran di-*update* dengan $x_{%d}$ sebagai batas.", i, i);
+            } else {
+                desc = String.format("Evaluasi $x_{%d}$: Titik berada di \\textbf{dalam} lingkaran. Status aman.", i);
             }
-            data.append(appender.recordStep(C, "step_" + step++, "blue"));
+            data.append(appender.recordStep(C, "step_" + step++, "blue", desc));
         }
 
-        data.append(appender.recordStep(C, "step_" + step, "red"));
+        data.append(appender.recordStep(C, "step_" + step, "red", "{\\Large \\bf \\color{red} Algoritma Selesai!}"));
 
         return C;
     }
 
-    public Circle miniDiscWith1Point(PointSet P, int n, Point q){
+    public Circle miniDiscWith1Point(PointSet P, int n, Point q, int qIdx){
         if(n == 0) {
-            Circle C = new Circle(q, q);  // jarak 0
-            data.append(appender.recordStep(C, "step_" + step++, "blue"));
+            Circle C = new Circle(q, q);
+            data.append(appender.recordStep(C, "step_" + step++, "blue", "Rekursi 1-Batas: Lingkaran dari 1 titik (" + qIdx + ")."));
             return C;
         }
 
@@ -57,38 +65,49 @@ public class SEC {
         Point center = circleCenter2Points(p, q);
         Circle C = new Circle(center, q);
 
-        data.append(appender.recordStep(C, "step_" + step++, "blue"));
+        data.append(appender.recordStep(C, "step_" + step++, "blue", 
+            String.format("Mulai Rekursi (Batas = $x_{%d}$): Buat lingkaran awal pakai $x_0$ dan $x_{%d}$.", qIdx, qIdx)
+        ));
 
         int i;
         Point pi;
         for(i = 1; i < n; i++){
             pi = P.getPoint(i);
+            String desc;
             if(!C.contains(pi)){
-                C = miniDiscWith2Points(P, i, pi, q);
+                // Lempar qIdx dan indeks i ke rekursi selanjutnya
+                C = miniDiscWith2Points(P, i, pi, i, q, qIdx);
+                desc = String.format("[Batas = $x_{%d}$] Evaluasi $x_{%d}$: Di luar! Masuk ke pencarian 3 titik batas.", qIdx, i);
+            } else {
+                desc = String.format("[Batas = $x_{%d}$] Evaluasi $x_{%d}$: Di dalam lingkaran sementara.", qIdx, i);
             }
-            data.append(appender.recordStep(C, "step_" + step++, "blue"));
+            data.append(appender.recordStep(C, "step_" + step++, "blue", desc));
         }
-
         return C;
     }
 
-    public Circle miniDiscWith2Points(PointSet P, int n, Point q1, Point q2){
+    public Circle miniDiscWith2Points(PointSet P, int n, Point q1, int q1Idx, Point q2, int q2Idx){
         Point center = circleCenter2Points(q1, q2);
         Circle C = new Circle(center, q1);
 
-        data.append(appender.recordStep(C, "step_" + step++, "blue"));
+        data.append(appender.recordStep(C, "step_" + step++, "blue", 
+            String.format("Mulai Rekursi (2 Batas): Lingkaran awal dari batas pasti $x_{%d}$ dan $x_{%d}$.", q1Idx, q2Idx)
+        ));
 
         int i;
         Point pi;
         for(i = 0; i < n; i++){
             pi = P.getPoint(i);
+            String desc;
             if(!C.contains(pi)){
                 Point center3 = circleCenter3Points(q1, q2, pi);
                 C = new Circle(center3, q1);
+                desc = String.format("[Batas = $x_{%d}, x_{%d}$] $x_{%d}$ di luar! Lingkaran dibentuk dari 3 titik batas.", q1Idx, q2Idx, i);
+            } else {
+                desc = String.format("[Batas = $x_{%d}, x_{%d}$] $x_{%d}$ aman di dalam.", q1Idx, q2Idx, i);
             }
-            data.append(appender.recordStep(C, "step_" + step++, "blue"));
+            data.append(appender.recordStep(C, "step_" + step++, "blue", desc));
         }
-
         return C;
     }
 

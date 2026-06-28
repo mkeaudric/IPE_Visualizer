@@ -85,11 +85,10 @@ public class VisualizerIPE {
     }
 
     public static String calculateLayout(double min_x, double max_x, double min_y, double max_y, int padding){
-        // default 1024 * 768
         double canvasMin_x = 0;
-        double canvasMax_x = 1024;
+        double canvasMax_x = 800;
         double canvasMin_y = 0;
-        double canvasMax_y = 768;
+        double canvasMax_y = 600;
         
         if(min_x < canvasMin_x) canvasMin_x = min_x - padding;
         if(max_x > canvasMax_x) canvasMax_x = max_x + padding;
